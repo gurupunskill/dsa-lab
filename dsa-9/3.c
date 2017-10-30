@@ -1,78 +1,116 @@
-//Program to construct a tree from a postfix expression
 #include<stdio.h>
 #include<stdlib.h>
-
-//Stack is needed for construction
-long int stack[50];
-int top = -1;
-
-//Let the tree be represented in the form of a structure
-struct tree{
-	int n;
-	char c;
-	struct tree *right , *left;
-}*root = NULL, *temp;
-
-//Function to push into stack
-void push(long int n)
+#include<stdbool.h>
+#include<string.h>
+ 
+// An expression tree node
+struct et
 {
-	stack[++top] = n;
+    char value;
+    struct et* left, *right;
+};
+
+struct et *stack[50];
+int tp = -1;
+
+void push (struct et * node)
+{
+	stack[++tp] = node;
 }
 
-//Function to pop
-int pop()
+void pop()
 {
-	return(stack[top--]);
+	tp--;
 }
 
-//Function to construct the tree
-long int tree_construct(char a[])
+struct et* top()
 {
-	int i , op1 , op2;
-	for(i=0;a[i]!='\0';++i)
-	{
-		if(a[i] == '/' || a[i] == '*' || a[i] == '-' || a[i] == '+' || a[i] == '^')
-		{
-			temp = (struct tree*)malloc(sizeof(struct tree));
-			op1 = pop();
-			op2 = pop();
-			temp->c = a[i];
-			temp->right = (struct tree*)malloc(sizeof(struct tree));
-			temp->left = (struct tree*)malloc(sizeof(struct tree));
-			temp->right->n = op1;
-			temp->left->n = op2;
-			push(temp);
-		}	
-		else
-			push(a[i]);
-	}
-	return stack[0];
+	return stack[tp];
 }
-
-//Funtion to display in pre order fashion
-void pre_display(struct tree *a)
+ 
+// A utility function to check if 'c'
+// is an operator
+bool isOperator(char c)
 {
-	if(a != NULL)
-	{
-		if(a->n>=0 && a->n<=9)
-			printf("%d" , a->n);
-		else
-			printf("%c" , a->c);
-	}
-	else
-		return;
-	pre_display(a->left);
-	pre_display(a->right);
+    if (c == '+' || c == '-' ||
+            c == '*' || c == '/' ||
+            c == '^')
+        return true;
+    return false;
 }
-
-//Main begins
-void main()
+ 
+// Utility function to do inorder traversal
+void inorder(struct et *t)
 {
-	char exp[20];
-	printf("\n\n\tCONSTRUCTION OF TREE FROM A POSTFIX EXPRESSION\n");
-	printf("\n\nEnter the postfix expression: ");
-	scanf("%s" , exp);
-	root = tree_construct(exp);
-	pre_display(root);
-	printf("\n\n");
+    if(t)
+    {
+        inorder(t->left);
+        printf("%c ", t->value);
+        inorder(t->right);
+    }
+}
+ 
+// A utility function to create a new node
+struct et* newNode(int v)
+{
+    struct et *temp = (struct et*) malloc (sizeof(struct et));
+    temp->left = temp->right = NULL;
+    temp->value = v;
+    return temp;
+};
+ 
+// Returns root of constructed tree for given
+// postfix expression
+struct et* constructTree(char postfix[])
+{
+    struct et *t, *t1, *t2;
+ 
+    // Traverse through every character of
+    // input expression
+    for (int i=0; i<strlen(postfix); i++)
+    {
+        // If operand, simply push into stack
+        if (!isOperator(postfix[i]))
+        {
+            t = newNode(postfix[i]);
+            push(t);
+        }
+        else // operator
+        {
+            t = newNode(postfix[i]);
+ 
+            // Pop two top nodes
+            t1 = top(); // Store top
+            pop();      // Remove top
+            t2 = top();
+            pop();
+ 
+            //  make them children
+            t->right = t1;
+            t->left = t2;
+ 
+            // Add this subexpression to stack
+            push(t);
+        }
+    }
+ 
+    //  only element will be root of expression
+    // tree
+    t = top();
+    pop();
+ 
+    return t;
+}
+ 
+// Driver program to test above
+int main()
+{
+    char postfix[100];
+    printf ("\n\n\t Enter Postfix Expression ==> ");
+    gets(postfix);
+    struct et* r = constructTree(postfix);
+    printf("\n\t Inorder expression of tree is ");
+    inorder(r);
+    printf ("\n\n\n");
+    return 0;
 }

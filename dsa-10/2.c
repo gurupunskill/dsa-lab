@@ -119,6 +119,26 @@ void display_3(struct Node* current)
 	}
 }
 
+int isBSTUtil(struct Node* node, int min, int max);
+ 
+int isBST(struct Node* node) 
+{ 
+  return(isBSTUtil(node, -32768, 32767)); 
+} 
+ 
+int isBSTUtil(struct Node* node, int min, int max) 
+{ 
+  if (node==NULL) 
+     return 1;
+       
+  if (node->data < min || node->data > max) 
+     return 0; 
+ 
+  return
+    isBSTUtil(node->left, min, node->data-1) &&  // Allow only distinct values
+    isBSTUtil(node->right, node->data+1, max); 
+} 
+
 void display(struct Node* root)
 {
 	printf ("\n\n\t Preorder ==> ");
@@ -141,9 +161,9 @@ int search(int dat, struct Node* current)
 void main()
 {
 	int ch = 0, dat;
-	while (ch != 5)
+	while (ch != 6)
 	{
-		printf ("\n\n\t 1. Insert Node \n\t 2. Display Tree \n\t 3. Delete Node \n\t 4. Search Tree \n\t 5. Exit \n\t ==> ");
+		printf ("\n\n\t 1. Insert Node \n\t 2. Display Tree \n\t 3. Delete Node \n\t 4. Search Tree \n\t 5. Is BST? \n\t 6. Exit \n\t ==> ");
 		scanf ("%d", &ch);
 		switch (ch)
 		{
@@ -168,8 +188,13 @@ void main()
 			if (found) {printf ("\n\t Found!");}
 			else printf ("\n\t Not Found!");
 			break;						
-
+			
 			case 5:
+			if (isBST(root))
+				printf ("\n\t True");
+			else printf ("\n\t False");
+			
+			case 6:
 			break;		
 
 			default:
