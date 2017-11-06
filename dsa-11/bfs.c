@@ -4,6 +4,58 @@
 #define white 0
 #define gray 1
 #define black 2
+#define INF 32767
+
+struct QNode
+{
+    int key;
+    struct QNode *next;
+};
+struct Queue
+{
+    struct QNode *front, *rear;
+};
+struct QNode* newNode(int k)
+{
+    struct QNode *temp = (struct QNode*)malloc(sizeof(struct QNode));
+    temp->key = k;
+    temp->next = NULL;
+    return temp; 
+}
+struct Queue *createQueue()
+{
+    struct Queue *q = (struct Queue*)malloc(sizeof(struct Queue));
+    q->front = q->rear = NULL;
+    return q;
+}
+void enqueue(struct Queue *q, int k)
+{
+    struct QNode *temp = newNode(k);
+    if (q->rear == NULL)
+    {
+        q->front = q->rear = temp;
+        return;
+    }
+    
+    q->rear->next = temp;
+    q->rear = temp;
+}
+int dequeue(struct Queue *q)
+{
+    if (q->front == NULL)
+    return -1;
+    
+    struct QNode *temp = q->front;
+    q->front = q->front->next;
+    
+    if (q->front == NULL)
+    q->rear = NULL;
+    return temp->key;
+}
+int isEmpty(struct Queue* Q)
+{
+    return (Q->front == NULL);
+}
 
 struct AdjNode 
 {
@@ -11,71 +63,8 @@ struct AdjNode
     int color;
     int d;
     struct AdjNode* next;
-    struct AdjNode* p;
+    struct AdjNode* P;
 };
-
-struct QueueNode
-{
-    struct AdjNode* Node;
-    struct QueueNode* next;
-    struct QueueNode* prev;
-};
-
-struct Queue
-{
-    struct QueueNode* head;
-    struct QueueNode* tail;
-    int n;
-};
-
-void enqueue(struct Queue* Q, struct AdjNode* item)
-{
-    struct QueueNode* new_Node = (struct QueueNode*) malloc (sizeof(struct QueueNode));
-    new_Node->Node = item;
-    new_Node->next = NULL;
-    new_Node->prev = NULL;
-
-    if (Q->head == NULL)
-    {
-        Q->head = new_Node;
-        Q->tail = Q->head;
-        Q->n = 1;
-    }
-
-    else
-    {
-        new_Node->prev = Q->tail;
-        Q->tail->next = new_Node;
-        Q->tail = Q->tail->next; 
-        Q->n ++;
-    }
-
-}
-
-struct AdjNode* dequeue(struct Queue* Q)
-{
-    if (Q->head == NULL)
-    {
-        printf ("\n\n\tError: Underflow");
-        return NULL;
-    }
-    struct AdjNode* return_Node = Q->head->Node;
-    Q->head = Q->head->next;
-    Q->head->prev = NULL;
-
-    if (Q->head == NULL)
-    {
-        Q->tail == NULL;
-    }
-    Q->n --;
-    return return_Node;
-}
-
-int isEmpty(struct Queue* Q)
-{
-    return (Q->n == 0);
-}
-
 struct AdjList
 {
     struct AdjNode* head;
@@ -95,7 +84,9 @@ struct Graph* createGraph (int v)
     graph->Edges = (struct AdjList*) malloc (v*sizeof(struct AdjList));
     for (int i = 0; i < v; i++ )
     {
-        graph->Edges[i].head = NULL;
+        graph->Edges[i].head = (struct AdjNode*) malloc (sizeof(struct AdjNode));
+        graph->Edges[i].head->data = i;
+        graph->Edges[i].head->next = NULL;        
     }
     return graph;
 }
@@ -104,13 +95,13 @@ void addEdge(struct Graph* graph, int src, int dest)
 {
     struct AdjNode* new_Node = (struct AdjNode*) malloc (sizeof(struct AdjNode));
     new_Node->data = dest;
-    new_Node->next = graph->Edges[src].head;
-    graph->Edges[src].head = new_Node;
+    new_Node->next = graph->Edges[src].head->next;
+    graph->Edges[src].head->next = new_Node;
 
     new_Node = (struct AdjNode*) malloc (sizeof(struct AdjNode));
     new_Node->data = src;
-    new_Node->next = graph->Edges[dest].head;
-    graph->Edges[dest].head = new_Node;    
+    new_Node->next = graph->Edges[dest].head->next;
+    graph->Edges[dest].head->next = new_Node;    
 }
 
 void printGraph(struct Graph* graph)
@@ -131,6 +122,45 @@ void printGraph(struct Graph* graph)
 
 void BFS(struct Graph* graph, int s)
 {
+    int i;
+    for (i = 0; i < graph->V; i++)
+    {
+        if ( i == s )
+            continue;
+        graph->Edges[i].head->color = white;
+        graph->Edges[i].head->d = INF;
+        graph->Edges[i].head->P = NULL;
+        
+    }
+    graph->Edges[s].head->color = gray;
+    graph->Edges[s].head->d = 0;
+    graph->Edges[s].head->P = NULL;
+
+    struct Queue* Q = createQueue();
+    enqueue(Q, s);
+
+    while (!isEmpty(Q))
+    {
+        //printf ("\nk");
+        struct AdjNode *U, *V, *W;
+        U = graph->Edges[dequeue(Q)].head;
+        printf ("\n\n Dequeued %d %d", U->data, U->d);
+        
+        W = U->next;
+        V = graph->Edges[W->data].head;
+        while(W != NULL)
+        {
+            if (V->color == white)
+            {
+                V->color = gray;  
+                V->d = U->d + 1;
+                V->P = U;
+                enqueue(Q, V->data);
+            }
+            W = W->next;
+            V = graph->Edges[W->data].head;
+        }
+    }
 
 }
 
@@ -147,6 +177,7 @@ int main()
     addEdge(graph, 3, 4);
  
     printGraph(graph);
- 
+    BFS(graph, 1);
+    printf ("\n\n\n");
     return 0;
 }
