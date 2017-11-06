@@ -38,7 +38,7 @@ void build_max_heap (int* A, int n)
 {
     // Check page 159 for complexity explanation
     // O(n)
-    for (int i = n/2 - 1; i >= 0; i--)
+    for (int i = (n/2) - 1; i >= 0; i--)
         max_heapify(A,i,n);
 }
 
@@ -49,7 +49,7 @@ void heapsort(int *A, int n)
     {
         int temp = A[0];
         A[0] = A[i];
-        A[i] = A[0];
+        A[i] = temp;
         max_heapify(A,0,i);        
     }
 }
@@ -62,7 +62,8 @@ void main()
         printf ("%d", A[i]);
     heapsort(A, 7);
 
-    printf ("\n\n Sorted ==> ");
+    printf ("\n Sorted ==> ");
     for (int i = 0; i < 7; i++)
         printf ("%d", A[i]);
+    printf ("\n\n");
 }
