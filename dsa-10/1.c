@@ -74,7 +74,6 @@ struct Node* search(int dat, struct Node* current)
 	return search(dat, current->right);
 }
 
-
 void delete(struct Node** root, int item)
 {
 	struct Node* z = search(item, *root);
