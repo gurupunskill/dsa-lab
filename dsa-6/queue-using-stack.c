@@ -40,20 +40,19 @@ int deQueue(struct queue *q)
         exit(0);
     }
  
-/* Move elements from satck1 to stack 2 only if
-stack2 is empty */
-if(q->stack2 == NULL)
-{
-    while(q->stack1 != NULL)
+    /* Move elements from satck1 to stack 2 only if
+    stack2 is empty */
+    if(q->stack2 == NULL)
     {
-        x = pop(&q->stack1);
-        push(&q->stack2, x);
-         
+        while(q->stack1 != NULL)
+        {
+            x = pop(&q->stack1);
+            push(&q->stack2, x);
+            
+        }
     }
-}
- 
-x = pop(&q->stack2);
-return x;
+    x = pop(&q->stack2);
+    return x;
 }
  
 /* Function to push an item to stack*/
